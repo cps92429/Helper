@@ -1,0 +1,31 @@
+# Core AI / Speech-to-Text
+openai-whisper>=20231117
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# Translation
+deep-translator>=1.11.4
+langdetect>=1.0.9
+
+# Video / Audio processing
+ffmpeg-python>=0.2.0
+moviepy>=1.0.3
+
+# Subtitle file handling
+pysrt>=1.1.2
+srt>=3.5.3
+
+# Image / Subtitle rendering
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# GUI (Windows-compatible via tkinter – built-in; extra theming)
+ttkthemes>=3.2.2
+
+# VS Code / Agent utilities
+requests>=2.31.0
+watchdog>=3.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.11.1

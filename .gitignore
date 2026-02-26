@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Torch / Whisper model cache
+*.pt
+*.bin
+
+# Output files (generated at runtime)
+output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.swp
+*.swo
+.idea/
+
+# Test artefacts
+.pytest_cache/
+.coverage
+htmlcov/
