@@ -1,0 +1,33 @@
+{
+  "transcription": {
+    "turbo_transcribe_ps1": "C:\\\\Users\\\\cps92\\\\turbo-transcribe.ps1",
+    "transcribe_drag_drop_ps1": "C:\\\\Users\\\\cps92\\\\transcribe-drag-drop.ps1",
+    "transcribe_config_ini": "C:\\\\Users\\\\cps92\\\\transcribe-config.ini",
+    "faster_whisper_exe": "C:\\\\Users\\\\cps92\\\\OneDrive\\\\Videos\\\\Pictures\\\\Desktop\\\\Faster-Whisper-XXL_Pro_r3.256.1_windows__cps92429@gmail.com\\\\Faster-Whisper-XXL Pro\\\\faster-whisper-xxl.exe",
+    "model_policy": {
+      "enabled": true,
+      "fallback_model": "turbo",
+      "rules": [
+        {
+          "max_mb": 200,
+          "model": "medium"
+        },
+        {
+          "max_mb": 1500,
+          "model": "small"
+        },
+        {
+          "max_mb": null,
+          "model": "base"
+        }
+      ]
+    }
+  },
+  "ffmpeg": {
+    "ffmpeg_exe": "ffmpeg"
+  },
+  "defaults": {
+    "output_dir_name": "Output",
+    "subtitle_format": "srt"
+  }
+}

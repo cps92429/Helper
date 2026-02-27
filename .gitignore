@@ -1,0 +1,18 @@
+# Generated output folders
+Output/
+source/
+subtitles/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node (if used for helpers)
+node_modules/
+
