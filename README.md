@@ -17,6 +17,13 @@ cd C:\Users\cps92\Projects\Helper
 .\setup.ps1 -Target All
 ```
 
+若要啟用 Agent1「即時聽打（麥克風 realtime）」功能，另外安裝選用套件：
+
+```powershell
+cd C:\Users\cps92\Projects\Helper
+.\setup.ps1 -Target Agent1Realtime
+```
+
 ## 學習你提供的 Faster-Whisper 安裝包
 你提供的資料夾（已納入 Agent1 自動偵測）：
 
@@ -52,6 +59,15 @@ Agent1 轉錄時會優先使用該 `faster-whisper-xxl.exe`（找不到才回退
 ```powershell
 .\agent-hub.ps1 -Agent agent1 -Task video.ui
 ```
+
+## 即時聽打 UI（麥克風 Realtime）
+啟動即時聽打視窗（多執行緒，不會卡 UI，可另存 SRT/TXT）：
+
+```powershell
+.\agent-hub.ps1 -Agent agent1 -Task video.realtime.ui
+```
+
+注意：此功能需要先安裝 `Agent1Realtime` 的選用套件（見上方）。
 
 ### 功能對應（你提出的 1-10）
 - 分層架構：`agents\agent1-video-subtitle\studio\`（services/config） + `ui\`
@@ -127,6 +143,8 @@ gh copilot -- login
 - 專業翻譯繁中（Copilot，產生 `*.zh-TW.srt`）
 - 產生雙語上下 `*.bilingual.ass`
 - 燒錄成 `*.burned.mp4`
+
+提示：燒錄字幕用的 ffmpeg filter 路徑已做 Windows 路徑轉義，含空白/中文路徑也能正常處理。
 
 提示：第一次使用「專業翻譯」前請先跑一次 `gh copilot -- login`。
 

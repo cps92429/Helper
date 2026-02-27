@@ -7,6 +7,14 @@ import subprocess
 
 ProgressCb = Callable[[int, str], None]
 
+def _ffmpeg_filter_escape_path(p: Path) -> str:
+    # ffmpeg filter args (ass/subtitles) treat ':' as an option separator, so drive letters must be escaped.
+    # Use forward slashes to avoid backslash escaping issues.
+    s = str(p.resolve()).replace("\\", "/")
+    s = s.replace(":", r"\:")
+    s = s.replace("'", r"\'")
+    return s
+
 
 @dataclass(frozen=True)
 class BurnResult:
@@ -31,9 +39,11 @@ def burn_in_ass(
 
     output_video.parent.mkdir(parents=True, exist_ok=True)
 
+    ass_esc = _ffmpeg_filter_escape_path(ass_path)
+
     # Burn-in requires re-encode video; keep audio stream copy.
     proc = subprocess.run(
-        [ffmpeg_exe, "-y", "-i", str(video_path), "-vf", f"ass={ass_path}", "-c:a", "copy", str(output_video)],
+        [ffmpeg_exe, "-y", "-i", str(video_path), "-vf", f"ass='{ass_esc}'", "-c:a", "copy", str(output_video)],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -45,4 +55,3 @@ def burn_in_ass(
     if progress_cb:
         progress_cb(100, f"燒錄完成：{output_video.name}")
     return BurnResult(output_video=output_video)
-
