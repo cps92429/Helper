@@ -11,6 +11,7 @@ param(
         "video.subtitles.preview",
         "video.apply",
         "video.ui",
+        "video.realtime.ui",
         "subtitles.translate.pro",
         "excel.summarize",
         "excel.automanage"

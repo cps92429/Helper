@@ -38,6 +38,15 @@ function Ensure-Dir {
     }
 }
 
+function Escape-FfmpegFilterPath {
+    param([string]$Path)
+    $p = (Resolve-Path -LiteralPath $Path).Path
+    $p = $p.Replace("\", "/")
+    $p = $p -replace ":", "\:"
+    $p = $p -replace "'", "\\'"
+    return $p
+}
+
 if (-not (Test-Path -LiteralPath $VideoPath)) { throw "Video not found: $VideoPath" }
 if (-not (Test-Path -LiteralPath $SubtitlePath)) { throw "Subtitles not found: $SubtitlePath" }
 
@@ -56,10 +65,11 @@ if (-not $OutputPath) {
 
 if ($Mode -eq "burn") {
     $ext = [IO.Path]::GetExtension($SubtitlePath).ToLowerInvariant()
+    $subEsc = Escape-FfmpegFilterPath -Path $SubtitlePath
     if ($ext -eq ".ass") {
-        & $ffmpeg -y -i $VideoPath -vf "ass=$SubtitlePath" -c:a copy $OutputPath
+        & $ffmpeg -y -i $VideoPath -vf "ass='$subEsc'" -c:a copy $OutputPath
     } else {
-        & $ffmpeg -y -i $VideoPath -vf "subtitles=$SubtitlePath" -c:a copy $OutputPath
+        & $ffmpeg -y -i $VideoPath -vf "subtitles='$subEsc'" -c:a copy $OutputPath
     }
 } else {
     & $ffmpeg -y -i $VideoPath -i $SubtitlePath -c copy -c:s mov_text $OutputPath

@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $false)]
-    [ValidateSet("Agent1", "Agent2", "All")]
+    [ValidateSet("Agent1", "Agent1Realtime", "Agent2", "All")]
     [string]$Target = "All",
 
     [Parameter(Mandatory = $false)]
@@ -79,6 +79,10 @@ $venvPython = New-Venv -Python $python -VenvDir $venvDir
 switch ($Target) {
     "Agent1" {
         Install-Req -VenvPython $venvPython -RequirementsPath (Join-Path $repoRoot "agents\\agent1-video-subtitle\\requirements.txt")
+    }
+    "Agent1Realtime" {
+        Install-Req -VenvPython $venvPython -RequirementsPath (Join-Path $repoRoot "agents\\agent1-video-subtitle\\requirements.txt")
+        Install-Req -VenvPython $venvPython -RequirementsPath (Join-Path $repoRoot "agents\\agent1-video-subtitle\\requirements-realtime.txt")
     }
     "Agent2" {
         Install-Req -VenvPython $venvPython -RequirementsPath (Join-Path $repoRoot "agents\\agent2-doc-excel\\requirements.txt")

@@ -7,6 +7,7 @@ param(
         "video.subtitles.preview",
         "video.apply",
         "video.ui",
+        "video.realtime.ui",
         "subtitles.translate.pro",
         "agent2.excel.summarize",
         "agent2.excel.automanage"
@@ -47,6 +48,18 @@ function Ensure-Dir {
     if (-not (Test-Path -LiteralPath $Path)) {
         New-Item -ItemType Directory -Force -Path $Path | Out-Null
     }
+}
+
+function Escape-FfmpegFilterPath {
+    param([string]$Path)
+    # Escape for ffmpeg filter args like: -vf "ass='C\:/path/file.ass'"
+    # - Use forward slashes to avoid backslash escaping hell
+    # - Escape drive-colon to avoid option-separator parsing (C\:/...)
+    $p = (Resolve-Path -LiteralPath $Path).Path
+    $p = $p.Replace("\", "/")
+    $p = $p -replace ":", "\:"
+    $p = $p -replace "'", "\\'"
+    return $p
 }
 
 function Get-DefaultOutputDir {
@@ -155,10 +168,11 @@ function Invoke-ApplySubtitles {
     if ($Mode -eq "burn") {
         # Burn-in subtitles (re-encode). Use ass filter when .ass is provided.
         $ext = [IO.Path]::GetExtension($SubtitlePath).ToLowerInvariant()
+        $subEsc = Escape-FfmpegFilterPath -Path $SubtitlePath
         if ($ext -eq ".ass") {
-            & $ffmpeg -y -i $VideoPath -vf "ass=$SubtitlePath" -c:a copy $OutputPath
+            & $ffmpeg -y -i $VideoPath -vf "ass='$subEsc'" -c:a copy $OutputPath
         } else {
-            & $ffmpeg -y -i $VideoPath -vf "subtitles=$SubtitlePath" -c:a copy $OutputPath
+            & $ffmpeg -y -i $VideoPath -vf "subtitles='$subEsc'" -c:a copy $OutputPath
         }
         return
     }
@@ -264,6 +278,9 @@ switch ($Task) {
             throw "Missing UI: $ui"
         }
         Invoke-PythonTool -RepoRoot $repoRoot -ScriptRelPath "agents\\agent1-video-subtitle\\ui\\subtitle_studio.py" -ArgsList @()
+    }
+    "video.realtime.ui" {
+        Invoke-PythonTool -RepoRoot $repoRoot -ScriptRelPath "agents\\agent1-video-subtitle\\ui\\realtime_studio.py" -ArgsList @()
     }
     "subtitles.translate.pro" {
         Assert-InputPath -Path $InputPath

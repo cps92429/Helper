@@ -1,0 +1,5 @@
+# Optional dependencies for Agent1 realtime microphone transcription.
+# Install with: .\setup.ps1 -Target Agent1Realtime
+faster-whisper
+sounddevice
+numpy
