@@ -1,0 +1,14 @@
+{
+  "files.exclude": {
+    "**/Output": true,
+    "**/source": true,
+    "**/subtitles": true
+  },
+  "search.exclude": {
+    "**/Output": true,
+    "**/source": true,
+    "**/subtitles": true
+  },
+  "powershell.powerShellDefaultVersion": "PowerShell 7"
+}
+

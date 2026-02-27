@@ -1,0 +1,4 @@
+# Agent1 is PowerShell-first. Python helpers are optional.
+# Keep this list minimal; install only when you use the Python preview/designer tools.
+srt==3.5.3
+opencc-python-reimplemented==0.1.7
