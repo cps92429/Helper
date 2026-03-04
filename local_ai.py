@@ -20,6 +20,7 @@ except ImportError as exc:  # pragma: no cover - handled at runtime
 
 
 DEFAULT_MODEL = "bigcode/starcoder2-3b"
+DEFAULT_FALLBACK_MODEL = "distilgpt2"
 
 
 def system_summary() -> str:
@@ -59,6 +60,14 @@ def build_pipeline(model_id: str, device_choice: Literal["auto", "cpu", "cuda"])
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Local Codex-style runner.")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Hugging Face model id")
+    parser.add_argument(
+        "--fallback-model",
+        default=DEFAULT_FALLBACK_MODEL,
+        help=(
+            "Fallback Hugging Face model id used when --model fails to load. "
+            "Use 'none' to disable fallback."
+        ),
+    )
     parser.add_argument("--prompt", required=True, help="Prompt text with your local context")
     parser.add_argument("--max-new-tokens", type=int, default=128, help="Tokens to generate")
     parser.add_argument("--temperature", type=float, default=0.2, help="Sampling temperature")
@@ -73,7 +82,32 @@ def main() -> None:
     args = parse_args()
     print(f"System: {system_summary()}")
     print(f"Loading model: {args.model}")
-    generator = build_pipeline(args.model, args.device)
+    fallback_model = None if args.fallback_model.strip().lower() == "none" else args.fallback_model.strip()
+
+    try:
+        generator = build_pipeline(args.model, args.device)
+        active_model = args.model
+    except Exception as primary_exc:  # pragma: no cover - runtime dependent
+        if not fallback_model or fallback_model == args.model:
+            raise SystemExit(
+                f"Failed to load model '{args.model}' and no valid fallback is configured. Error: {primary_exc}"
+            ) from primary_exc
+
+        print(
+            f"Warning: failed to load '{args.model}'. Falling back to '{fallback_model}'.",
+            file=sys.stderr,
+        )
+        try:
+            generator = build_pipeline(fallback_model, args.device)
+            active_model = fallback_model
+        except Exception as fallback_exc:  # pragma: no cover - runtime dependent
+            raise SystemExit(
+                "Failed to load both primary and fallback models. "
+                f"Primary error: {primary_exc}; fallback error: {fallback_exc}"
+            ) from fallback_exc
+
+    if active_model != args.model:
+        print(f"Using fallback model: {active_model}")
 
     result = generator(
         args.prompt,
