@@ -37,6 +37,18 @@ Run local model with an interactive prompt input:
 run_local.bat
 ```
 
+Run docs Q&A (RAG) with an interactive query input:
+
+```bat
+run_rag.bat
+```
+
+Run code helper with an interactive code input:
+
+```bat
+run_code.bat
+```
+
 Manual setup on Windows (PowerShell):
 
 ```powershell
