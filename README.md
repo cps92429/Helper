@@ -17,6 +17,29 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+### Windows Quick Start
+
+Use the one-click bootstrap script in Command Prompt or PowerShell:
+
+```bat
+bootstrap.bat
+```
+
+Launch the Streamlit task panel (double-click friendly):
+
+```bat
+run_ui.bat
+```
+
+Manual setup on Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
 ## Run a local model
 
 - Default model: `bigcode/starcoder2-3b` (compact, Codex-like).
@@ -25,6 +48,8 @@ pip install -r requirements.txt
 - If the primary model fails to load, it automatically falls back to `distilgpt2`.
 - Set a custom fallback with `--fallback-model <model-id>`.
 - Disable fallback with `--fallback-model none`.
+- Enable load retries with `--load-retries` (default: `2`).
+- Adjust retry interval with `--retry-delay` seconds (default: `1.5`).
 - Control output with `--max-new-tokens`, `--temperature`, and `--top-p`.
 
 ## Use your local context
@@ -37,3 +62,17 @@ pip install -r requirements.txt
 
 - First run downloads weights to `~/.cache/huggingface/hub`; subsequent runs are offline.
 - For strictly offline use, pre-download with `huggingface-cli download <model>`.
+
+## Troubleshooting
+
+- **Model load fails intermittently (network/cache hiccups)**
+  - Increase retries: `--load-retries 4 --retry-delay 2`
+  - Keep fallback enabled so the runner can switch models automatically.
+
+- **CUDA requested but no GPU detected**
+  - Use `--device auto` or `--device cpu`.
+
+- **Both primary and fallback models fail**
+  - Verify model IDs and internet access for first download.
+  - Try a smaller model, e.g. `--model distilgpt2 --fallback-model none`.
+  - Ensure dependencies are installed: `pip install -r requirements.txt`.

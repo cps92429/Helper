@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import platform
 import sys
+import time
 from typing import Literal
 
 try:
@@ -57,6 +58,34 @@ def build_pipeline(model_id: str, device_choice: Literal["auto", "cpu", "cuda"])
     )
 
 
+def build_pipeline_with_retries(
+    model_id: str,
+    device_choice: Literal["auto", "cpu", "cuda"],
+    retries: int,
+    retry_delay: float,
+):
+    attempts = retries + 1
+    last_exc: Exception | None = None
+
+    for attempt in range(1, attempts + 1):
+        try:
+            return build_pipeline(model_id, device_choice)
+        except Exception as exc:  # pragma: no cover - runtime dependent
+            last_exc = exc
+            if attempt >= attempts:
+                break
+            print(
+                f"Warning: loading '{model_id}' failed (attempt {attempt}/{attempts}). "
+                f"Retrying in {retry_delay:.1f}s...",
+                file=sys.stderr,
+            )
+            time.sleep(retry_delay)
+
+    raise RuntimeError(
+        f"Failed to load model '{model_id}' after {attempts} attempt(s)."
+    ) from last_exc
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Local Codex-style runner.")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Hugging Face model id")
@@ -75,17 +104,39 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--device", choices=("auto", "cpu", "cuda"), default="auto", help="Execution device preference"
     )
+    parser.add_argument(
+        "--load-retries",
+        type=int,
+        default=2,
+        help="Retry count for model loading failures (default: 2).",
+    )
+    parser.add_argument(
+        "--retry-delay",
+        type=float,
+        default=1.5,
+        help="Seconds to wait between model-load retries (default: 1.5).",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if args.load_retries < 0:
+        raise SystemExit("--load-retries must be >= 0")
+    if args.retry_delay < 0:
+        raise SystemExit("--retry-delay must be >= 0")
+
     print(f"System: {system_summary()}")
     print(f"Loading model: {args.model}")
     fallback_model = None if args.fallback_model.strip().lower() == "none" else args.fallback_model.strip()
 
     try:
-        generator = build_pipeline(args.model, args.device)
+        generator = build_pipeline_with_retries(
+            args.model,
+            args.device,
+            retries=args.load_retries,
+            retry_delay=args.retry_delay,
+        )
         active_model = args.model
     except Exception as primary_exc:  # pragma: no cover - runtime dependent
         if not fallback_model or fallback_model == args.model:
@@ -98,7 +149,12 @@ def main() -> None:
             file=sys.stderr,
         )
         try:
-            generator = build_pipeline(fallback_model, args.device)
+            generator = build_pipeline_with_retries(
+                fallback_model,
+                args.device,
+                retries=args.load_retries,
+                retry_delay=args.retry_delay,
+            )
             active_model = fallback_model
         except Exception as fallback_exc:  # pragma: no cover - runtime dependent
             raise SystemExit(
