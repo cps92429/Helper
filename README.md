@@ -31,6 +31,12 @@ Launch the Streamlit task panel (double-click friendly):
 run_ui.bat
 ```
 
+Run local model with an interactive prompt input:
+
+```bat
+run_local.bat
+```
+
 Manual setup on Windows (PowerShell):
 
 ```powershell
