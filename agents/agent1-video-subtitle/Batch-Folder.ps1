@@ -29,6 +29,19 @@ if (-not (Test-Path -LiteralPath $venvPython)) {
 }
 
 $tool = Join-Path $repoRoot "agents\\agent1-video-subtitle\\tools\\studio_cli.py"
+if (-not (Test-Path -LiteralPath $tool)) {
+    throw "Tool not found: $tool"
+}
+
+if ($OutputDir) {
+    if (-not [IO.Path]::IsPathRooted($OutputDir)) {
+        $OutputDir = Join-Path $repoRoot $OutputDir
+    }
+    if (-not (Test-Path -LiteralPath $OutputDir)) {
+        New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+    }
+    $OutputDir = (Resolve-Path -LiteralPath $OutputDir).Path
+}
 
 $argsList = @("--input", $FolderPath, "--transcribe")
 if ($OutputDir) { $argsList += @("--output-dir", $OutputDir) }

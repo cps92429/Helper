@@ -24,6 +24,63 @@ cd C:\Users\cps92\Projects\Helper
 .\setup.ps1 -Target Agent1Realtime
 ```
 
+## 一鍵本機部署（建議）
+已新增統一部署入口：
+
+```powershell
+cd C:\Users\cps92\Projects\Helper
+.\scripts\Invoke-LocalDeployment.ps1 -Target All
+```
+
+這個腳本會依序：
+- 檢查 PowerShell 相容性（支援 5.1 與 7+，建議 7+）
+- 建立 `.env` / `.env.example`（placeholder，不含真實密鑰）
+- 嘗試自動安裝 FFmpeg（可用時優先 winget，其次 Chocolatey）
+- 呼叫 `setup.ps1` 安裝 Python 套件
+- 執行最小 smoke test（確認關鍵 Python 套件可 import）
+
+常用參數：
+
+```powershell
+# 只部署 Agent1
+.\scripts\Invoke-LocalDeployment.ps1 -Target Agent1
+
+# 部署 Agent1 + 即時聽打套件
+.\scripts\Invoke-LocalDeployment.ps1 -Target Agent1Realtime
+
+# 只部署 Agent2
+.\scripts\Invoke-LocalDeployment.ps1 -Target Agent2
+
+# 跳過 FFmpeg 自動安裝
+.\scripts\Invoke-LocalDeployment.ps1 -Target All -SkipFfmpeg
+
+# 跳過 smoke test
+.\scripts\Invoke-LocalDeployment.ps1 -Target All -SkipSmokeTest
+```
+
+> 若你需要 `subtitles.translate.pro`，請先完成一次 `gh copilot -- login`。
+
+## 環境變數（.env）
+專案根目錄已提供：
+- `.env.example`
+- `.env`
+
+目前預留欄位（選用，僅作為 Copilot CLI token fallback）：
+- `COPILOT_GITHUB_TOKEN`
+- `GH_TOKEN`
+- `GITHUB_TOKEN`
+
+建議平常優先使用 `gh copilot -- login` 完成 OAuth 登入，不必手動維護 token。
+
+## 常見問題
+- **ExecutionPolicy 阻擋腳本**：
+  使用 process-only bypass：
+  `Set-ExecutionPolicy -Scope Process Bypass`
+- **FFmpeg 安裝失敗**：
+  請手動安裝 FFmpeg，並確認 `ffmpeg` 可在 PowerShell 直接執行。
+- **PowerShell 版本較舊**：
+  5.1 可用，但建議 PowerShell 7+ 以獲得最佳相容與體驗。
+
 ## 學習你提供的 Faster-Whisper 安裝包
 你提供的資料夾（已納入 Agent1 自動偵測）：
 

@@ -9,6 +9,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+if ($PSVersionTable.PSVersion.Major -lt 5) {
+    throw "PowerShell 5.1+ is required. Current: $($PSVersionTable.PSVersion)"
+}
+
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Warning "PowerShell 7+ is recommended. Current: $($PSVersionTable.PSVersion). Running in compatibility mode."
+}
+
 function Get-PythonExe {
     param([string]$Requested)
 
@@ -52,6 +60,20 @@ function New-Venv {
     return $venvPython
 }
 
+function Test-PythonVersion {
+    param([string]$Python)
+
+    $versionText = & $Python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+    if (-not $versionText) {
+        throw "Unable to detect Python version from: $Python"
+    }
+
+    $version = [version]$versionText
+    if ($version -lt [version]"3.8") {
+        throw "Python 3.8+ is required. Current: $version"
+    }
+}
+
 function Install-Req {
     param(
         [string]$VenvPython,
@@ -73,6 +95,7 @@ $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $repoRoot
 
 $python = Get-PythonExe -Requested $PythonExe
+Test-PythonVersion -Python $python
 $venvDir = Join-Path $repoRoot ".venv"
 $venvPython = New-Venv -Python $python -VenvDir $venvDir
 

@@ -1,8 +1,10 @@
 param(
     [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
     [string]$VideoPath,
 
     [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
     [string]$SubtitlePath,
 
     [Parameter(Mandatory = $false)]
@@ -10,6 +12,7 @@ param(
     [string]$Mode = "burn",
 
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string]$OutputPath = ""
 )
 
@@ -54,6 +57,9 @@ $repoRoot = Resolve-RepoRoot -ScriptDir $scriptDir
 $config = Get-Agent1Config -RepoRoot $repoRoot
 $ffmpeg = $config.ffmpeg.ffmpeg_exe
 if (-not $ffmpeg) { $ffmpeg = "ffmpeg" }
+if (-not (Get-Command $ffmpeg -ErrorAction SilentlyContinue)) {
+    throw "ffmpeg executable not found: $ffmpeg"
+}
 
 $outDir = Join-Path $repoRoot $config.defaults.output_dir_name
 Ensure-Dir -Path $outDir
@@ -61,6 +67,11 @@ Ensure-Dir -Path $outDir
 if (-not $OutputPath) {
     $base = [IO.Path]::GetFileNameWithoutExtension($VideoPath)
     $OutputPath = Join-Path $outDir ($base + ".subtitled.mp4")
+}
+
+$outputParent = Split-Path -Parent $OutputPath
+if ($outputParent) {
+    Ensure-Dir -Path $outputParent
 }
 
 if ($Mode -eq "burn") {
